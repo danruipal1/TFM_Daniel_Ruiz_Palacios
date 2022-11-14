@@ -1,0 +1,141 @@
+---
+title: "Análisis de la TRN de C.salexigens"
+author: "Daniel Ruiz Palacios"
+date: ""
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+  word_document:
+    toc: yes
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+location: Universidad de Sevilla
+---
+# Steps before creating Venn diagrams::
+  
+```{r}
+library(this.path)
+library(igraph)
+library(VennDiagram)
+cur_dir2 = dirname(this.path())
+setwd(cur_dir2)
+getwd()
+```
+
+```{r}
+
+# Orthologous old network
+orthologous.old.TRN <- read.csv('orthologous_old_network.sif', sep = '\t', header = F)
+orthologous.old.TRN[,2] = NULL
+orthologous.old.TRN <- unique(orthologous.old.TRN)
+orthologous.old.network <- graph.data.frame(orthologous.old.TRN, directed = F)
+
+# Orthologous new network
+orthologous.new.TRN <- read.csv('orthologous_new_network_FIXED.sif', sep = '\t', header = F)
+orthologous.new.TRN[,2] = NULL
+orthologous.new.TRN <- unique(orthologous.new.TRN)
+orthologous.new.network <- graph.data.frame(orthologous.new.TRN, directed = F)
+
+# Old network
+old.TRN <- read.csv('old_network.sif', sep = '\t', header = F)
+old.TRN[,2] = NULL
+old.TRN <- unique(old.TRN)
+old.network <- graph.data.frame(old.TRN, directed = F)
+
+# Final network
+final.TRN <- read.csv('final_network_FIXED.sif', sep = '\t', header = F)
+final.TRN[,2] = NULL
+final.TRN <- unique(final.TRN)
+final.network <- graph.data.frame(final.TRN, directed = F)
+
+# List of genes:
+
+orthologous.old.TRN.genes <- unique(c(orthologous.old.TRN[,"V1"], orthologous.old.TRN[,"V3"]))
+
+old.TRN.genes <- unique(c(old.TRN[,"V1"], old.TRN[,"V3"]))
+
+orthologous.new.TRN.genes <- unique(c(orthologous.new.TRN[,"V1"], orthologous.new.TRN[,"V3"]))
+
+final.TRN.genes <- unique(c(final.TRN[,"V1"], final.TRN[,"V3"]))
+
+# List of interactions:
+
+orthologous.old.TRN$V2 <- paste(orthologous.old.TRN$V1,"-",orthologous.old.TRN$V3)
+orthologous.old.TRN.interactions <- orthologous.old.TRN$V2
+
+old.TRN$V2 <- paste(old.TRN$V1,"-",old.TRN$V3)
+old.TRN.interactions <- old.TRN$V2
+
+orthologous.new.TRN$V2 <- paste(orthologous.new.TRN$V1,"-",orthologous.new.TRN$V3)
+orthologous.new.TRN.interactions <- orthologous.new.TRN$V2
+
+final.TRN$V2 <- paste(final.TRN$V1,"-",final.TRN$V3)
+final.TRN.interactions <- final.TRN$V2
+```
+
+# Venn diagram comparing the common genes between the 2 old networks and the new orthologous network:
+
+```{r}
+set2 <- c(old.TRN.genes)
+set3 <- c(orthologous.new.TRN.genes)
+set4 <- c(orthologous.old.TRN.genes)
+
+colors <- c("#00FF00","#0000FF", "#FF0000")
+
+# Make Venn diagram from list of groups
+venn.diagram(x = list(set2, set3, set4) ,
+            category.names = c("Old TRN", "Orthologous new TRN", "Orthologous old TRN"),
+            filename = 'common_genes_3_networks_venn.png',
+            output=F,
+            imagetype="png", 
+            scaled = T,
+            col = "black",
+            fill = colors,
+            cat.col = colors,
+            height = 4000,
+            width = 4000
+)
+
+# Display saved image
+options(repr.plot.height=12, repr.plot.width= 12)
+library("png")
+pp <- readPNG("common_genes_3_networks_venn.png")
+plot.new() 
+rasterImage(pp,0,0,1.1,1.1)
+```
+
+# Venn diagram comparing the common interactions between the 2 old networks and the new orthologous network:
+
+```{r}
+
+set2 <- old.TRN.interactions
+set3 <- orthologous.new.TRN.interactions
+set4 <- orthologous.old.TRN.interactions
+
+colors <- c("#00FF00","#0000FF", "#FF0000")
+
+# Make Venn diagram from list of groups
+venn.diagram(x = list(set2, set3, set4) ,
+            category.names = c("Old TRN", "Orthologous new TRN", "Orthologous old TRN"),
+            filename = 'common_interactions_3_networks_venn.png',
+            output=F,
+            imagetype="png", 
+            scaled = T,
+            col = "black",
+            fill = colors,
+            cat.col = colors,
+            height = 4000,
+            width = 4000
+)
+
+# Display saved image
+options(repr.plot.height=12, repr.plot.width= 12)
+library("png")
+pp <- readPNG("common_interactions_3_networks_venn.png")
+plot.new() 
+rasterImage(pp,0,0,1.1,1.1)
+```
+
